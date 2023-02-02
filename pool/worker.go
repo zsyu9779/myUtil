@@ -16,11 +16,10 @@ package gopool
 
 import (
 	"fmt"
+	"log"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
-
-	"github.com/bytedance/gopkg/util/logger"
 )
 
 var workerPool sync.Pool
@@ -63,7 +62,7 @@ func (w *worker) run() {
 							w.pool.panicHandler(t.ctx, r)
 						} else {
 							msg := fmt.Sprintf("GOPOOL: panic in pool: %s: %v: %s", w.pool.name, r, debug.Stack())
-							logger.CtxErrorf(t.ctx, msg)
+							log.Fatal(msg)
 						}
 					}
 				}()
