@@ -3,7 +3,6 @@ module github.com/zsyu9779/myUtil
 go 1.21
 
 require (
-	codeup.aliyun.com/aha/social_aha_gotool v0.0.1-20240403145538-77d388fe1087
 	github.com/astaxie/beego v1.12.3
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-redis/redis/v8 v8.11.5

@@ -1,10 +1,9 @@
 package go_behind
 
 import (
-	"codeup.aliyun.com/aha/social_aha_gotool/alarm_notify"
-	"codeup.aliyun.com/aha/social_aha_gotool/gopool"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	gopool "github.com/zsyu9779/myUtil/pool"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -58,7 +57,6 @@ func GoBehind(f func()) {
 					WithField("location", location).
 					WithField("namespace", config.NamespaceMode).
 					WithField("stack", string(buf)).Error("go behind panic")
-				alarm_notify.AlarmByEnv(os.Getenv("APP_MODE"), "go behind panic", log)
 			}
 		}()
 		f()
@@ -81,7 +79,6 @@ func GoBehindWithParam(f func([]interface{}), param ...interface{}) {
 					WithField("location", location).
 					WithField("namespace", config.NamespaceMode).
 					WithField("stack", string(buf)).Error("go behind panic")
-				alarm_notify.AlarmByEnv(os.Getenv("APP_MODE"), "go behind panic", log)
 			}
 		}()
 		f(param)
