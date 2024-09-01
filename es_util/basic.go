@@ -2,7 +2,6 @@ package g_es
 
 import (
 	"github.com/olivere/elastic/v7"
-	"os"
 	"time"
 )
 
@@ -27,7 +26,7 @@ func initEsConnect() *elastic.Client {
 		elastic.SetHealthcheckInterval(10*time.Second),
 		// 是否探测非master节点
 		elastic.SetSniff(false),
-		elastic.SetErrorLog(os.Stdout),
+		//elastic.SetErrorLog(os.Stdout),
 	)
 	if err != nil {
 		panic(err)

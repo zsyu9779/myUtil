@@ -5,28 +5,11 @@ import (
 	"encoding/json"
 	"testing"
 	"time"
-
-	conf "codeup.aliyun.com/aha/social_aha_gotool/config"
-	"codeup.aliyun.com/aha/social_aha_gotool/tool"
-	"codeup.aliyun.com/aha/social_aha_gotool/utils"
 )
 
 func TestLogInfo(t *testing.T) {
-	serConf := &conf.Appconfig{}
-	serConf.Common.Debug = true
-	serConf.Log.Dir = "/tmp/golog/"
-	serConf.Log.LogCollectPath = "log_collect/"
-	serConf.Log.LogMsgPath = "log_msg/"
-
-	// 初始化日志路径
-	InitLog(serConf.Log.Dir+serConf.Log.LogCollectPath, serConf.Log.Dir+serConf.Log.LogMsgPath, "")
-
-	if !tool.FileExists(serConf.Log.Dir+serConf.Log.LogCollectPath) || !tool.FileExists(serConf.Log.Dir+serConf.Log.LogMsgPath) {
-		t.Fatalf("log path init fail. %v %v", serConf.Log.Dir+serConf.Log.LogCollectPath, serConf.Log.Dir+serConf.Log.LogMsgPath)
-	}
-
+	filePath := "/tmp/log/testloginfo.log"
 	fileName := "testloginfo"
-	filePath := serConf.Log.Dir + serConf.Log.LogCollectPath + fileName + ".log"
 	log := NewLogger(filePath, "", BUFFER_CAP)
 	ctx := context.Background()
 	LogInfo(ctx, log, fileName, "test test  %s", "111111")
@@ -57,14 +40,7 @@ func TestLogInfo(t *testing.T) {
 
 func fakeCtx() context.Context {
 	ctx := context.Background()
-	cbReq := utils.AhaReqData{
-		Uri:      "/this/is/fake/uri",
-		SynID:    "thisIsSynID",
-		Version:  110060,
-		ClientIP: "1.2.3.4",
-		RemoteIP: "4.3.2.1",
-		UserID:   "userid",
-	}
+	cbReq := map[string]string{}
 	return context.WithValue(ctx, "AhaReqData", &cbReq)
 }
 

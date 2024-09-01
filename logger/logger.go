@@ -12,15 +12,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"codeup.aliyun.com/aha/social_aha_gotool/uniqid"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
-
-	"codeup.aliyun.com/aha/social_aha_gotool/tool"
-	"codeup.aliyun.com/aha/social_aha_gotool/utils"
 )
 
 // BUFFER_CAP 异步日志队列大小
@@ -32,7 +28,7 @@ const TypeResourceLog = "type_resource_log"
 var defaultLogDir = "/tmp/golog/"
 var logResourcePath string
 
-//	localHostName 本机名称
+// localHostName 本机名称
 var localHostName string
 
 //	InitLogPath 服务启动的时候初始化业务日志路径
@@ -50,6 +46,11 @@ func Init(dir, collectPathName, msgPathName, resourcePathName string) {
 	InitPanicRecoverLogger(dir + "panic.log")
 }
 
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil || os.IsExist(err)
+}
+
 //	InitLog 服务启动的时候初始化业务日志
 // 		logCollectPath string  logCollect大数据日志收集路径 /home/log/log_collect
 //		logMsgPath string 业务日志路径 对应php中的logError，go中对应的函数是LogMsg /home/log/log_msg
@@ -62,7 +63,7 @@ func InitLog(collectPath, msgPath, resourcePath string) {
 		collectPath = defaultLogDir + "log_collect/"
 	}
 	logCollectPath = collectPath
-	if !tool.FileExists(logCollectPath) {
+	if !FileExists(logCollectPath) {
 		if err := createFile(logCollectPath); err != nil {
 			panic(err)
 		}
@@ -73,7 +74,7 @@ func InitLog(collectPath, msgPath, resourcePath string) {
 		msgPath = defaultLogDir + "log_msg/"
 	}
 	logMsgPath = msgPath
-	if !tool.FileExists(logMsgPath) {
+	if !FileExists(logMsgPath) {
 		if err := createFile(logMsgPath); err != nil {
 			panic(err)
 		}
@@ -84,14 +85,14 @@ func InitLog(collectPath, msgPath, resourcePath string) {
 		resourcePath = defaultLogDir + "log_resource/"
 	}
 	logResourcePath = resourcePath
-	if !tool.FileExists(logResourcePath) {
+	if !FileExists(logResourcePath) {
 		if err := createFile(logResourcePath); err != nil {
 			panic(err)
 		}
 	}
 }
 
-//	大数据日志收集
+// 大数据日志收集
 var logCollectPath string
 var logCollectMutex sync.Mutex
 var logCollectMap map[string]*Logger
@@ -236,7 +237,8 @@ var delKey = map[string]bool{"_type": true, "_id": true, "_score": true, "_index
 var strvalKey = map[string]bool{"userid": true, "workid": true, "uid": true, "songid": true, "duetid": true}
 
 // LogInfo 写入日志
-// 		typ logCollc方法会传
+//
+//	typ logCollc方法会传
 func LogInfo(ctx context.Context, log *Logger, typ string, format interface{}, args ...interface{}) {
 
 	logFields := make(map[string]interface{})
@@ -245,24 +247,24 @@ func LogInfo(ctx context.Context, log *Logger, typ string, format interface{}, a
 	//logMsg["type"] = typ
 	logFields["time"] = now.Format("2006-01-02 15:04:05")
 	logFields["localname"] = localHostName
-	for k, v := range utils.GetReqData(ctx) {
-		var nk string
-		switch k {
-		case "uri":
-			nk = "uri"
-		case "version":
-			nk = "version"
-		case "synid":
-			nk = "synid"
-		case "clientip":
-			nk = "clientip"
-		case "userid":
-			nk = "userid"
-		default:
-			nk = k
-		}
-		logFields[nk] = v
-	}
+	//for k, v := range utils.GetReqData(ctx) {
+	//	var nk string
+	//	switch k {
+	//	case "uri":
+	//		nk = "uri"
+	//	case "version":
+	//		nk = "version"
+	//	case "synid":
+	//		nk = "synid"
+	//	case "clientip":
+	//		nk = "clientip"
+	//	case "userid":
+	//		nk = "userid"
+	//	default:
+	//		nk = k
+	//	}
+	//	logFields[nk] = v
+	//}
 
 	if len(args) > 0 {
 		forma, ok := format.(string)
@@ -309,7 +311,6 @@ func LogInfo(ctx context.Context, log *Logger, typ string, format interface{}, a
 
 // logMsg 记录业务日志
 // 格式为 2006-01-02 15:04:05	arg0|+|arg1|+|...|+|argN	synID	clientIP	remoteIP
-// ctx 传 nil 不追加 AhaReqData
 func logMsg(ctx context.Context, log *Logger, args []interface{}) {
 	logTime := time.Now().Format("2006-01-02 15:04:05")
 	var builder strings.Builder
@@ -321,14 +322,14 @@ func logMsg(ctx context.Context, log *Logger, args []interface{}) {
 		}
 		builder.WriteString(fmt.Sprintf("%v", arg))
 	}
-	if ctx != nil {
-		cbReq, ok := utils.GetCbReqData(ctx)
-		if ok {
-			builder.WriteString("\t" + cbReq.GetSynID() + "\t" + cbReq.GetClientIP() + "\t" + cbReq.GetRemoteIP())
-		} else if uuid, err := uniqid.NewUUID(); err == nil {
-			builder.WriteString("\t" + uuid.Get() + "\t" + "1.2.3.4" + "\t" + "4.3.2.1")
-		}
-	}
+	//if ctx != nil {
+	//	cbReq, ok := utils.GetCbReqData(ctx)
+	//	if ok {
+	//		builder.WriteString("\t" + cbReq.GetSynID() + "\t" + cbReq.GetClientIP() + "\t" + cbReq.GetRemoteIP())
+	//	} else if uuid, err := uniqid.NewUUID(); err == nil {
+	//		builder.WriteString("\t" + uuid.Get() + "\t" + "1.2.3.4" + "\t" + "4.3.2.1")
+	//	}
+	//}
 	builder.WriteString("\n")
 	_, _ = log.Write([]byte(builder.String()))
 }
@@ -345,32 +346,32 @@ func logJsonMsg(ctx context.Context, log *Logger, fields map[string]interface{})
 	for k, v := range fields {
 		logFields[k] = v
 	}
-	if ctx != nil {
-		for k, v := range utils.GetReqData(ctx) {
-			var nk string
-			switch k {
-			case "uri":
-				continue // 没必要记 uri
-			case "version":
-				nk = "version"
-			case "synid":
-				nk = "synid"
-			case "clientip":
-				nk = "clientip"
-			case "userid":
-				nk = "userid"
-			default:
-				nk = k
-			}
-			logFields[nk] = v
-		}
-	}
+	//if ctx != nil {
+	//	for k, v := range utils.GetReqData(ctx) {
+	//		var nk string
+	//		switch k {
+	//		case "uri":
+	//			continue // 没必要记 uri
+	//		case "version":
+	//			nk = "version"
+	//		case "synid":
+	//			nk = "synid"
+	//		case "clientip":
+	//			nk = "clientip"
+	//		case "userid":
+	//			nk = "userid"
+	//		default:
+	//			nk = k
+	//		}
+	//		logFields[nk] = v
+	//	}
+	//}
 	logStr, _ := json.Marshal(logFields)
 	logStr = append(logStr, []byte("\n")...)
 	_, _ = log.Write(logStr)
 }
 
-//PanicRecoverLogger pannic日志路径
+// PanicRecoverLogger pannic日志路径
 var PanicRecoverLogger *Logger
 
 func InitPanicRecoverLogger(path string) {
@@ -391,7 +392,7 @@ func AccessLogger(path string) *Logger {
 }
 
 func createFile(path string) error {
-	if tool.FileExists(path) {
+	if FileExists(path) {
 		return nil
 	}
 	return os.MkdirAll(path, os.ModePerm)

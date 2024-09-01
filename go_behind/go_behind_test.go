@@ -1,8 +1,8 @@
 package go_behind
 
 import (
-	"codeup.aliyun.com/aha/social_aha_gotool/gopool"
 	"github.com/sirupsen/logrus"
+	gopool "github.com/zsyu9779/myUtil/pool"
 	"testing"
 	"time"
 )
